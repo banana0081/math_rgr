@@ -51,7 +51,13 @@ def Filter(FFT, freqs_side, N, t):
             FFT[i] = FFT[i]/100
     print(FFT[0:1000])
     return(FFT, freqs_side, N, t)
-
+def reverseFilter(FFT, freqs_side, N, t):
+    global THRESHOLD
+    for i in range(len(FFT)):
+        if abs(FFT[i])> THRESHOLD: # Наоборот, найдем значения выше порога и удалим их
+            FFT[i] = 0
+    print(FFT[0:1000])
+    return(FFT, freqs_side, N, t)
 def IDFT(FFT, freqs_side, N, t):
     FFT_side = FFT[range(N//2)]
     fr2=  plt.subplot(224)
@@ -69,7 +75,14 @@ def IDFT(FFT, freqs_side, N, t):
     plt.show(block=False)
     return(new_SIGNAL)
 
+def IDFTnoplot(FFT, freqs_side, N, t):
+    new_SIGNAL = scipy.fft.irfft(FFT)
+    return(new_SIGNAL)
+
 result = Filter(*DFT(FILE))
+rubbish = reverseFilter(*DFT(FILE))
 new_sig = IDFT(*result)
+rubbish_sig = IDFTnoplot(*rubbish)
 sf.write('clean.wav', new_sig, 48000, subtype='PCM_24')
+sf.write('rumbling.wav', rubbish_sig, 48000, subtype='PCM_24')
 plt.show()
