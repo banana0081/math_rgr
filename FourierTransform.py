@@ -5,10 +5,11 @@ import scipy
 import scipy.fftpack
 import numpy as np
 from matplotlib import pyplot as plt
+import soundfile as sf
 
 FILE = 'test.wav'
-FS_RATE, SIGNAL = wavfile.read(FILE) # Загружаем частоту дискретизации и сами точки
-THRESHOLD = 800000
+SIGNAL, FS_RATE= sf.read(FILE) # Загружаем частоту дискретизации и сами точки
+THRESHOLD = 100
 SIZE = len(SIGNAL)
 N = SIGNAL.shape[0]
 DENSITY = SIZE/N
@@ -21,7 +22,7 @@ def DFT(file):
     Ts = 1.0/FS_RATE # Вычисляем период
     print ("Период: ", round(Ts, 2), "с. ")
     t = np.arange(0, secs, Ts) # Составляем массив с координатами точек во времени
-    FFT = abs(scipy.fft.rfft(SIGNAL))
+    FFT = scipy.fft.rfft(SIGNAL)
     FFT_side = FFT[range(N//2)] # Нам необходима лишь первая половина сигнала
     freqs = scipy.fftpack.fftfreq(SIGNAL.size, t[1]-t[0])
     freqs_side = freqs[range(N//2)] # Соответственно, лишь первая половина частот
@@ -46,8 +47,9 @@ def DFT(file):
 def Filter(FFT, freqs_side, N, t):
     global THRESHOLD
     for i in range(len(FFT)):
-        if FFT[i]<THRESHOLD: # Если значение ниже порога, уменьшаем его
+        if abs(FFT[i])< THRESHOLD: # Если значение ниже порога, уменьшаем его
             FFT[i] = FFT[i]/100
+    print(FFT[0:1000])
     return(FFT, freqs_side, N, t)
 
 def IDFT(FFT, freqs_side, N, t):
@@ -69,7 +71,5 @@ def IDFT(FFT, freqs_side, N, t):
 
 result = Filter(*DFT(FILE))
 new_sig = IDFT(*result)
-norm_new_sig = np.int32(new_sig * (2**32 / max(new_sig)))
-write("clean.wav", 48000, norm_new_sig)
-
+sf.write('clean.wav', new_sig, 48000, subtype='PCM_24')
 plt.show()
