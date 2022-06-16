@@ -9,7 +9,7 @@ import soundfile as sf
 
 FILE = 'test.wav'
 SIGNAL, FS_RATE= sf.read(FILE) # Загружаем частоту дискретизации и сами точки
-THRESHOLD = 100
+THRESHOLD = 1000
 SIZE = len(SIGNAL)
 N = SIGNAL.shape[0]
 DENSITY = SIZE/N
